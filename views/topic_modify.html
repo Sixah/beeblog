@@ -1,0 +1,32 @@
+{{template "header"}}
+<title>修改文章 - 我的 beego 博客</title>
+<!-- <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">  -->
+</head>
+<body>
+    <div class="navbar navbar-default navbar-fixed-top">
+        <div class="container">
+            {{template "navbar" .}}
+        </div>
+    </div>
+    </br></br>
+    <div class="container">
+        <h1>修改文章</h1>
+        <form method="post" action="/topic">
+            <input type="hidden" name="tid" value="{{.Tid}}">
+            <div class="form-group">
+                <label>文章标题: </label>
+                <input type="text" name="title" class="form-control" value="{{.Topic.Title}}">
+            </div>
+
+            <div class="form-group">
+                <label>文章内容: </label>
+                <textarea name="content" class="form-control" cols="30" rows="10">{{.Topic.Content}}</textarea>
+            </div>
+            <button type="submit" class="btn btn-default">修改文章</button>
+        </form>
+    </div>
+
+    <script type="text/javascript" src="https://cdn.staticfile.org/jquery/3.4.1/jquery.min.js"></script>
+    <script type="text/javascript" src="/static/js/bootstrap.min.js"></script>
+</body>
+</html>
