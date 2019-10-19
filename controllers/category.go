@@ -2,7 +2,6 @@ package controllers
 
 import (
 	"beeblog/models"
-	"fmt"
 	"github.com/astaxie/beego"
 )
 
@@ -11,13 +10,11 @@ type CategoryController struct {
 }
 
 func (this *CategoryController) Get() {
-	this.Data["IsLogin"] = checkAccount(this.Ctx)
-	op := this.Input().Get("op")
-
+	this.Data["IsLogin"] = checkAccount(this.Ctx) // 检测是否登录
+	op := this.Input().Get("op")                  // 分类操作类型
 	switch op {
-	case "add":
-		name := this.Input().Get("name")
-		fmt.Println("33333333333333333",name)
+	case "add": // 添加分类
+		name := this.Input().Get("name") // 分类名称
 		if len(name) == 0 {
 			break
 		}
@@ -25,10 +22,10 @@ func (this *CategoryController) Get() {
 		if err != nil {
 			beego.Error(err)
 		}
-		this.Redirect("/category",301)
+		this.Redirect("/category", 301) // 重定向到分类页面
 		return
-	case "del":
-		id := this.Input().Get("id")
+	case "del": // 删除分类
+		id := this.Input().Get("id") // 分类id
 		if len(id) == 0 {
 			break
 		}
@@ -36,18 +33,16 @@ func (this *CategoryController) Get() {
 		if err != nil {
 			beego.Error(err)
 		}
-		this.Redirect("/category",301)
+		this.Redirect("/category", 301) // 重定向到分类页面
 		return
 	}
-	this.Data["IsCategory"] = true
-	this.TplName = "category.html"
-	//var err error
-	data,err := models.GetAllCategories()
+	this.Data["IsCategory"] = true // 导航栏分类 高亮标志位
+	this.TplName = "category.html" // 渲染分类页面模板
+	data, err := models.GetAllCategories()
 	if err != nil {
 		beego.Error(err)
 	}
-	this.Data["Categories"] = data
-	fmt.Println("6666666666",data)
+	this.Data["Categories"] = data // 分类列表数据
 }
 
 func (this *CategoryController) Post() {

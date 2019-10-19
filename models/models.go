@@ -9,29 +9,8 @@ import (
 	"time"
 )
 
-//type Category struct {
-//	gorm.Model
-//	Title string // 标题
-//	Views int64 `gorm:"index"` // 浏览的次数
-//	TopicCount int64 // 文章数量
-//	TopicLastUserId int64 // 最后一次更新分类的用户id
-//}
-//
-//type Topic struct {
-//	gorm.Model
-//	Uid int64 // 用户id
-//	Title string // 文章标题
-//	Content string `gorm:"size(5000)"` // 文章内容
-//	Attachment string // 附件
-//	Views int64 `gorm:"index"` // 浏览次数
-//	Author string // 作者姓名
-//	ReplyTime time.Time  `gorm:"index"` // 评论回复时间
-//	ReplyCount int64 // 评论数量
-//	ReplyLastUserId int64 // 最后评论的用户id
-//}
-
 const (
-	_DB_NAME = "data/beeblog.db"
+	_DB_NAME        = "data/beeblog.db"
 	_SQLITE3_DRIVER = "sqlite3"
 )
 
@@ -39,11 +18,13 @@ type Category struct {
 	Id              int64
 	Title           string    // 标题
 	Created         time.Time `orm:"index"` // 分类创建时间
+	Updated         time.Time // 分类更新时间
 	Views           int64     `orm:"index"` // 浏览的次数
 	TopicTime       time.Time `orm:"index"` // 文章发表时间
 	TopicCount      int64     // 文章数量
 	TopicLastUserId int64     // 最后一次更新分类的用户id
 }
+
 /*
 CREATE TABLE `category` (
      `id` integer NOT NULL PRIMARY KEY AUTOINCREMENT,
@@ -61,6 +42,8 @@ CREATE INDEX `category_topic_time` ON `category` (`topic_time`);
 type Topic struct {
 	Id              int64
 	Uid             int64     // 用户id
+	Type            string    // 文章分类
+	Labels string // 标签
 	Title           string    // 文章标题
 	Content         string    `orm:"size(5000)"` // 文章内容
 	Attachment      string    // 附件
@@ -72,6 +55,7 @@ type Topic struct {
 	ReplyCount      int64     // 评论数量
 	ReplyLastUserId int64     // 最后评论的用户id
 }
+
 /*
  CREATE TABLE IF NOT EXISTS `topic` (
         `id` integer NOT NULL PRIMARY KEY AUTOINCREMENT,
@@ -92,16 +76,24 @@ CREATE INDEX `topic_updated` ON `topic` (`updated`);
 CREATE INDEX `topic_views` ON `topic` (`views`);
 */
 
+type Comment struct {
+	Id int64
+	Tid int64
+	Name string
+	Content string `orm:"size(1000)"`
+	Created time.Time
+}
+
 var DB orm.Ormer
 
 func RegisterDB() {
 	if !com.IsExist(_DB_NAME) {
-		os.MkdirAll(path.Dir(_DB_NAME),os.ModePerm)
+		os.MkdirAll(path.Dir(_DB_NAME), os.ModePerm)
 		os.Create(_DB_NAME)
 	}
 
-	orm.RegisterModel(new(Category),new(Topic))
-	orm.RegisterDriver(_SQLITE3_DRIVER,orm.DRSqlite)
-	orm.RegisterDataBase("default",_SQLITE3_DRIVER,_DB_NAME,10)
+	orm.RegisterModel(new(Category), new(Topic),new(Comment))
+	orm.RegisterDriver(_SQLITE3_DRIVER, orm.DRSqlite)
+	orm.RegisterDataBase("default", _SQLITE3_DRIVER, _DB_NAME, 10)
 	DB = orm.NewOrm()
 }
