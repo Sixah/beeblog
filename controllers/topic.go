@@ -3,6 +3,7 @@ package controllers
 import (
 	"beeblog/models"
 	"github.com/astaxie/beego"
+	"path"
 	"strings"
 )
 
@@ -30,18 +31,35 @@ func (this *TopicController) Post() {
 		this.Redirect("/login", 302) // 重定向到登录页面
 		return
 	}
-
+	// 解析表单
 	tType := this.Input().Get("type")      // 文章类型
 	title := this.Input().Get("title")     // 文章标题
 	content := this.Input().Get("content") // 文章内容
 	tid := this.Input().Get("tid")         // 文章id
-	labels := this.Input().Get("labels")
-	var err error
+	labels := this.Input().Get("labels") // 文章标签
+
+	// 获取附件
+	_,fh,err := this.GetFile("attachment")
+	if err != nil {
+		beego.Error(err)
+	}
+	var attachment string
+	if fh != nil {
+		// 保存附件
+		attachment = fh.Filename
+		beego.Info(attachment)
+		err = this.SaveToFile("attachment",path.Join("attachment",attachment))
+		// TODO:http保存附件的另一种写法
+		if err != nil {
+			beego.Error(err)
+		}
+	}
+
 	// 通过判断文章id是否存在 辨别文章添加和修改操作
 	if len(tid) == 0 { // 文章id不存在 添加文章
-		err = models.AddTopic(tType, labels,title, content)
+		err = models.AddTopic(tType, labels,title, content,attachment)
 	} else { // 文章id存在 修改文章
-		err = models.ModifyTopic(tType,labels, tid, title, content)
+		err = models.ModifyTopic(tType,labels, tid, title, content,attachment)
 	}
 	if err != nil {
 		beego.Error(err)

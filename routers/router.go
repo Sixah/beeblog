@@ -14,4 +14,8 @@ func init() {
 	beego.Router("/reply",&controllers.ReplyController{})
 	beego.Router("/reply/add",&controllers.ReplyController{},"post:Add")
 	beego.Router("/reply/del",&controllers.ReplyController{},"get:Delete")
+	// 附件目录作为静态文件
+	//beego.SetStaticPath("/attachment","attachment")
+	// 附件目录作为一个单独的控制器来处理
+	beego.Router("/attachment/:all",&controllers.AttachmentController{})
 }

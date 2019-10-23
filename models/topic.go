@@ -2,13 +2,15 @@ package models
 
 import (
 	"github.com/astaxie/beego/orm"
+	"os"
+	"path"
 	"strconv"
 	"strings"
 	"time"
 )
 
 // 添加文章
-func AddTopic(tType,labels, title, content string) error {
+func AddTopic(tType,labels, title, content,attachment string) error {
 	labels = "$"+strings.Join(strings.Split(labels," "),"#$") + "#"
 	db := orm.NewOrm()
 	db.Begin() // 开启事务(不能使用全局的数据库连接，会报错)
@@ -17,6 +19,7 @@ func AddTopic(tType,labels, title, content string) error {
 		Labels:labels,
 		Title:     title,
 		Content:   content,
+		Attachment:attachment,
 		Created:   time.Now(),
 		Updated:   time.Now(),
 		ReplyTime: time.Now(),
@@ -107,12 +110,15 @@ func GetTopic(tid string) (*Topic, error) {
 }
 
 // 修改文章
-func ModifyTopic(tType, labels,tid, title, content string) error {
+func ModifyTopic(tType, labels,tid, title, content,attachment string) error {
 	labels = "$"+strings.Join(strings.Split(labels," "),"#$") + "#"
 	tidNum, err := strconv.ParseInt(tid, 10, 64)
 	if err != nil {
 		return err
 	}
+
+	var oldAttach string
+
 	topic := &Topic{}
 	err = DB.QueryTable("topic").Filter("id", tidNum).One(topic)
 	if err == nil { // 修改的文章存在
@@ -204,10 +210,12 @@ func ModifyTopic(tType, labels,tid, title, content string) error {
 			}
 		}
 
+		oldAttach = topic.Attachment
 		topic.Type = tType
 		topic.Labels = labels
 		topic.Title = title
 		topic.Content = content
+		topic.Attachment = attachment
 		topic.Updated = time.Now()
 		_, err := db.Update(topic) // 修改文章信息
 		if err != nil {
@@ -215,6 +223,11 @@ func ModifyTopic(tType, labels,tid, title, content string) error {
 			return err
 		}
 		db.Commit()
+
+		// 删除旧的附件
+		if len(oldAttach) > 0 {
+			os.Remove(path.Join("attachment",oldAttach))
+		}
 		return nil
 	}
 	return nil
